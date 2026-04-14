@@ -1,0 +1,22 @@
+To ensure complete portability, your D: drive (the USB) should have the following structure.
+
+D:\
+├── bin\                     (Your Ollama executables)
+├── node\                    (Your portable Node.js binaries)
+├── node_modules\            (Your installed npm modules, including openclaw)
+├── ollama_models\           (Your downloaded Ollama models)
+├── openclaw_master_data\    (Where OpenClaw keeps all its configuration and runtime state)
+│   ├── .openclaw\           (Auto-created state folder for cache/sessions so it won't touch the host machine)
+│   └── openclaw.json        (A JSON file containing your agents config, replacing the YAML)
+├── package.json             (Project dependencies)
+├── start_ollama.bat         (Script to launch Ollama)
+├── start_ollama.sh          
+├── start_openclaw.bat       (Script to launch OpenClaw orchestrator correctly)
+└── start_openclaw.sh
+
+--------------------------------------------------------------------------------------
+IMPORTANT NOTES:
+
+1. `openclaw_master_data/openclaw.json` has been updated to contain the agent definitions that were previously in your `openclaw.yaml`. Since OpenClaw's configuration file must be JSON (or JSON5) and doesn't natively accept YAML through a `--config` flag for `gateway run`, your agent setup is now successfully embedded into this main `openclaw.json` file.
+2. The scripts `start_openclaw.bat` and `start_openclaw.sh` have been modified to correctly launch `openclaw gateway run` (which expects no `--config` flag) and explicitly point `OPENCLAW_STATE_DIR` to `D:\openclaw_master_data\.openclaw` and `OPENCLAW_CONFIG_PATH` to `D:\openclaw_master_data\openclaw.json` before launching. This completely cuts OpenClaw off from the host machine's configuration files.
+3. The command `openclaw start` was the real reason it was failing with a `plugins.allow` error! OpenClaw does not have a native `start` command, so it assumed `start` was an unallowed third-party plugin! The wrapper script now executes `openclaw gateway run` instead, which is the proper way to start the orchestrator framework!
